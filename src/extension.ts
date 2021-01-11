@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import {getFiles} from './ftp';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -13,7 +14,9 @@ export function activate(context: vscode.ExtensionContext) {
 		vscode.window.showInformationMessage('Hello World from nachi robot language support!');
 	});
 
-	context.subscriptions.push(helloWorld);
+	let getfileWithFtp = vscode.commands.registerCommand('nachi-robot-language-support.getfile-with-ftp', () => getFiles());
+
+	context.subscriptions.push(helloWorld, getfileWithFtp);
 }
 
 export function deactivate() {}

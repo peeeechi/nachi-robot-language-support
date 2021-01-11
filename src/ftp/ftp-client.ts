@@ -1,8 +1,8 @@
-import ftp from 'ftp';
-import fs from 'fs';
+import * as ftp from 'ftp';
+import * as fs from 'fs';
 
-const client = new ftp();
 
+const client            = new ftp();
 const serverIp          = "192.168.1.1";
 const serverPort        = 21;
 const userName          = "Anonymous";
