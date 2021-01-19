@@ -19,14 +19,14 @@
  ],
  "main": "./out/extension.js",
  "keywords": [
-    "nachi",
-    "fujikoshi",
-    "Fujikoshi",
-    "Nachi",
-    "Robot",
-    "Program"
-],
-"publisher": "pechi",
+  "nachi",
+  "fujikoshi",
+  "Fujikoshi",
+  "Nachi",
+  "Robot",
+  "Program"
+ ],
+ "publisher": "pechi",
  "contributes": {
   "languages": [
    {
