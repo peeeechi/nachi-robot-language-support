@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
-import {getFiles} from './ftp';
+import {Options} from 'ftp';
+import {getDirInfoFTPAsync,getFileFTPAsync,sendFileFTPAsync} from './ftp-client';
+import {CompileType,ResponceCode,remoteCompile} from './remote-compile';
 
 export function activate(context: vscode.ExtensionContext) {
 
