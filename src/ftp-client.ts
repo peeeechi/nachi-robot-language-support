@@ -1,4 +1,4 @@
-import ftp,{ListingElement,Options} from 'ftp';
+import * as ftp from 'ftp';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -11,7 +11,7 @@ export function createClient(option: ftp.Options): ftp {
 }
 
 
-export async function pwdFTPAsync(option: Options) {
+export async function pwdFTPAsync(option: ftp.Options) {
 
     return new Promise<string>((resolve, hasError) => {        
         const client = createClient(option);
@@ -31,9 +31,9 @@ export async function pwdFTPAsync(option: Options) {
     });    
 }
 
-export async function getDirInfoFTPAsync(option: Options, targetDir: string = "/"): Promise<ListingElement[]> {
+export async function getDirInfoFTPAsync(option: ftp.Options, targetDir: string = "/"): Promise<ftp.ListingElement[]> {
 
-    return new Promise<ListingElement[]> ((resolve, hasError) => {
+    return new Promise<ftp.ListingElement[]> ((resolve, hasError) => {
         const client = createClient(option);
         client.on("ready", () => {
             client.cwd(targetDir, (err, currentDir) => {
@@ -58,7 +58,7 @@ export async function getDirInfoFTPAsync(option: Options, targetDir: string = "/
     });
 }
 
-export async function getFileFTPAsync(option: Options, targetFileName: string, saveDir?: string): Promise<void> {
+export async function getFileFTPAsync(option: ftp.Options, targetFileName: string, saveDir?: string): Promise<void> {
 
     const saveBaseDir: string = saveDir? saveDir : path.dirname(__dirname);
 
@@ -83,7 +83,7 @@ export async function getFileFTPAsync(option: Options, targetFileName: string, s
     });
 }
 
-export async function sendFileFTPAsync(option: Options, sourceFilePath: string, destinationDir?: string): Promise<void> {
+export async function sendFileFTPAsync(option: ftp.Options, sourceFilePath: string, destinationDir?: string): Promise<void> {
 
     const saveBaseDir: string = destinationDir? destinationDir : "/";
     return new Promise<void> ((resolve, hasError) => {

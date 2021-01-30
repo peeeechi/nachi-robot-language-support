@@ -1,7 +1,7 @@
 {
- "name": "nachi-robot-language-support",
+ "name": "Nachi robot language support",
  "displayName": "nachi robot language support",
- "description": "nachi-robot-language-support",
+ "description": "nachi robot language support",
  "icon": "images/NRL_LOGO.png",
  "license": "MIT",
  "version": "0.0.1",
@@ -13,9 +13,11 @@
   "Snippets"
  ],
  "activationEvents": [
-  "onCommand:nachi-robot-language-support.helloWorld",
-  "onCommand:nachi-robot-language-support.getfile-with-ftp",
-  "onCommand:nachi-robot-language-support.decompile"
+  "onCommand:Nachi robot language support.get-file-ftp",
+  "onCommand:Nachi robot language support.send-file-ftp",
+  "onCommand:Nachi robot language support.send-and-compile",
+  "onCommand:Nachi robot language support.remote-compile",
+  "onCommand:Nachi robot language support.remote-decompile"
  ],
  "main": "./out/extension.js",
  "keywords": [
@@ -10057,20 +10059,35 @@
    }
   ],
   "configuration": {
-   "title": "extension settings",
+   "title": "Nachi Robot Language Support",
    "type": "object",
    "properties": {
-    "conf.strItem": {
+    "nrl-settings.Robot ip address": {
      "type": "string",
      "default": "127.0.0.1",
-     "description": "sample of string"
+     "description": "ip address of cfd or fd ondesk"
     },
-    "conf.numItem": {
-     "type": "number",
-     "default": 12,
-     "description": "sample of number"
+    "nrl-settings.FTP work directory path": {
+     "type": "string",
+     "default": "WORK",
+     "description": "WORK directory path for ftp"
     },
-    "conf.objItem": {
+    "nrl-settings.FTP user name": {
+     "type": "string",
+     "default": "Anonymous",
+     "description": "ftp user name"
+    },
+    "nrl-settings.FTP password": {
+     "type": "string",
+     "default": "",
+     "description": "ftp password"
+    },
+    "nrl-settings.Robot type": {
+     "type": "string",
+     "default": "MZ07-01",
+     "description": "robot type name prefix"
+    },
+    "nrl-settings.objItem": {
      "type": "object",
      "default": {
       "valNum": 0,
@@ -10082,16 +10099,24 @@
   },
   "commands": [
    {
-    "command": "nachi-robot-language-support.helloWorld",
-    "title": "nachi-robot-language-support: Hello World"
+    "command": "Nachi robot language support.get-file-ftp",
+    "title": "Nachi robot language support: Get File With FTP"
    },
    {
-    "command": "nachi-robot-language-support.getfile-with-ftp",
-    "title": "nachi-robot-language-support: Get File With FTP"
+    "command": "Nachi robot language support.send-file-ftp",
+    "title": "Nachi robot language support: Send File With FTP"
    },
    {
-    "command": "nachi-robot-language-support.decompile",
-    "title": "nachi-robot-language-support: Decompile robot program"
+    "command": "Nachi robot language support.send-and-compile",
+    "title": "Nachi robot language support: Send and Remote Compile"
+   },
+   {
+    "command": "Nachi robot language support.remote-compile",
+    "title": "Nachi robot language support: Remote compile"
+   },
+   {
+    "command": "Nachi robot language support.remote-decompile",
+    "title": "Nachi robot language support: Remote decompile"
    }
   ]
  },
