@@ -3,9 +3,9 @@ import * as ftp from 'ftp';
 import * as fs from 'fs';
 import ExtensionSettings from './extension-settings';
 import {createClient, getDirInfoFTPAsync,getFileFTPAsync,sendFileFTPAsync} from './ftp-client';
-import {CompileType,ResponceCode,remoteCompile} from './remote-compile';
+import {CompileType,ResponceCode,remoteCompile, ResponceCodeMessagePair} from './remote-compile';
 import * as path from 'path';
-import { compileFunction } from 'vm';
+import { resolve } from 'dns';
 
 const extentionName 		= 'Nachi robot language support';
 const programDirName 		= "PROGRAM";
@@ -252,7 +252,7 @@ export async function RemoteCompileExecute(settings: ExtensionSettings, console:
 
 		const selected = await vscode.window.showQuickPick(fileList.map(info => info.name), {canPickMany: true, placeHolder: "please select compile program files."});
 
-		if (selected == null) return;
+		if (selected == null || selected.length <= 0) return;
 
 		selected.forEach(async file => {
 
@@ -276,6 +276,12 @@ export async function RemoteCompileExecute(settings: ExtensionSettings, console:
 	}
 }
 
+async function sleep(waitTimeMsec: number) {
+	return new Promise<void>(resolve => {
+		setTimeout(() => resolve(), waitTimeMsec);
+	});
+}
+
 export async function RemoteDecompileExecute(settings: ExtensionSettings, console: vscode.OutputChannel) {
 
 	try {
@@ -285,7 +291,7 @@ export async function RemoteDecompileExecute(settings: ExtensionSettings, consol
 			user: settings.ftpUserName,
 			connTimeout: 2000
 		};
-		const infoList = await getDirInfoFTPAsync(op, path.resolve(settings.ftpWorkDir, programDirName));
+		const infoList = await getDirInfoFTPAsync(op, path.join(settings.ftpWorkDir, programDirName));
 		const fileList = infoList.filter(info => {
 			if (info.type === '-' && compiledProgramRegix.test(info.name)) return info;
 		});
@@ -297,7 +303,7 @@ export async function RemoteDecompileExecute(settings: ExtensionSettings, consol
 
 		const selected = await vscode.window.showQuickPick(fileList.map(info => info.name), {canPickMany: true, placeHolder: "please select decompile program files."});
 
-		if (selected == null) return;
+		if (selected == null || selected.length <= 0) return;
 
 		const decompileList = [
 			CompileType.DecompileMove,
@@ -319,14 +325,25 @@ export async function RemoteDecompileExecute(settings: ExtensionSettings, consol
 		selected.forEach(async file => {
 
 			const programNo: number = Number.parseInt(programNoRegix.exec(file)![0]);
-			const ret = await remoteCompile(programNo, settings.robotIp, decompileType!);
+
+			let ret: ResponceCodeMessagePair = ResponceCode.RemoteCompilationInProgress;
+			while (true) {
+
+				ret = await remoteCompile(programNo, settings.robotIp, decompileType!);
 		
-			if (ret.code === ResponceCode.Success.code) {
-				vscode.window.showInformationMessage(`success decompile ${path.basename(file)}`);	
-			}		
-			else {
-				vscode.window.showErrorMessage(`faild decompile ${path.basename(file)}.\n error code: ${ret.code},\nmessage: ${ret.message}`);	
-			}
+				if (ret.code === ResponceCode.Success.code) {
+					vscode.window.showInformationMessage(`success decompile ${path.basename(file)}`);
+					break;
+				}		
+				else if(ret.code === ResponceCode.RemoteCompilationInProgress.code) {
+					await sleep(1000);
+					continue;
+				}
+				else {
+					vscode.window.showErrorMessage(`faild decompile ${path.basename(file)}.\n error code: ${ret.code},\nmessage: ${ret.message}`);
+					break;	
+				}
+			}	
 		});
 
 		return;

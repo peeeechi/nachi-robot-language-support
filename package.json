@@ -10045,7 +10045,7 @@
    {
     "language": "nrl",
     "scopeName": "source.nrl",
-    "path": "./syntaxes/nrls.tmLanguage."
+    "path": "./syntaxes/nrls.tmLanguage.json"
    }
   ],
   "snippets": [
