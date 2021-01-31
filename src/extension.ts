@@ -50,8 +50,8 @@ export function activate(context: vscode.ExtensionContext) {
 		await getfileWithFtp(settings, outputConsole);
 	});
 
-	let remoteCompileCommand = vscode.commands.registerCommand(`${extentionName}.remote-compile`, () => {
-		vscode.window.showErrorMessage("remote-compile is not supported.")
+	let remoteCompileCommand = vscode.commands.registerCommand(`${extentionName}.remote-compile`, async () => {
+		await RemoteCompileExecute(settings, outputConsole);
 	});
 
 	let remoteDecompileCommand = vscode.commands.registerCommand(`${extentionName}.remote-decompile`, async () => {
@@ -79,7 +79,7 @@ export async function sendfileWithFtp(settings: ExtensionSettings, sendFilePath:
 	// await sendFileFTPAsync(op, targetFile, settings.ftpWorkDir);	
 	await sendFileFTPAsync(op, sendFilePath, destDir);	
 	// console.show(true);
-	console.appendLine(`${sendFilePath} send to ${path.resolve(destDir, path.basename(sendFilePath))}`);
+	console.appendLine(`[nrl ftp send]: "${sendFilePath}" send to "${path.join(destDir, path.basename(sendFilePath))}"`);
 }
 
 export async function getfileWithFtp(settings: ExtensionSettings, console: vscode.OutputChannel) {
@@ -166,6 +166,7 @@ export async function getfileWithFtp(settings: ExtensionSettings, console: vscod
 					else if (targetInfo.type == '-') {
 	
 						client.get(targetInfo.name, (err, stream) => {
+							const saveFilePath = path.resolve(vscode.workspace.rootPath!, targetInfo.name);
 							if (err) {
 								vscode.window.showErrorMessage(err.message);
 								client.end();
@@ -177,8 +178,17 @@ export async function getfileWithFtp(settings: ExtensionSettings, console: vscod
 									return;
 								});
 							}
-	
-							const writeStream = stream.pipe(fs.createWriteStream(path.resolve(vscode.workspace.rootPath!, targetInfo.name)), {end: true});
+							
+							const writeStream = stream.pipe(fs.createWriteStream(saveFilePath), {end: true});
+
+							client.pwd((err, current) => {
+								if (err) {
+									vscode.window.showErrorMessage(err.message);
+									client.end();
+									return;
+								}
+								console.appendLine(`[nrl ftp get]: "${path.join(current, targetInfo.name)}" save to "${saveFilePath}"`);
+							});
 						});
 					}
 					else {
@@ -207,7 +217,7 @@ export async function sendFileAndRemoteCompileExecute(settings: ExtensionSetting
 	if (asciiProgramRegix.test(programFile)) {
 
 		try {
-			await sendfileWithFtp(settings, programFile, path.resolve(settings.ftpWorkDir, programDirName), console);
+			await sendfileWithFtp(settings, programFile, path.join(settings.ftpWorkDir, programDirName), console);
 		}
 		catch (error) {
 			const errorMessage = `ftp faild !!\nerror: ${error}`;
@@ -217,13 +227,25 @@ export async function sendFileAndRemoteCompileExecute(settings: ExtensionSetting
 
 		const programNo: number = Number.parseInt(programNoRegix.exec(programFile)![0]);
 		const ret = await remoteCompile(programNo, settings.robotIp, CompileType.Compile0);
-	
-		if (ret === ResponceCode.Success) {
-			vscode.window.showInformationMessage(`success compile ${path.basename(programFile)}`);	
-		}		
-		else {
-			vscode.window.showErrorMessage(`faild compile ${path.basename(programFile)} with code ${ret}`);	
+
+		while (true) {
+
+			if (ret.code === ResponceCode.Success.code) {
+				vscode.window.showInformationMessage(`success compile ${path.basename(programFile)}`);
+				break;
+			}		
+			else if(ret.code === ResponceCode.RemoteCompilationInProgress.code) {
+				vscode.window.showInformationMessage(`waiting compile ${path.basename(programFile)} ...`);
+				await sleep(1000);
+				continue;
+			}
+			else {
+				vscode.window.showErrorMessage(`faild compile ${path.basename(programFile)} with code ${ret}`);	
+				break;
+			}
 		}
+
+		vscode.window.showInformationMessage(`remote compile done.`);	
 	}
 	else {
 		vscode.window.showErrorMessage(`${path.basename(programFile)} is not ASCII Program file ext!! (require {robot-name}-A.[001 - 9999])`);	
@@ -240,7 +262,7 @@ export async function RemoteCompileExecute(settings: ExtensionSettings, console:
 			user: settings.ftpUserName,
 			connTimeout: 2000
 		};
-		const infoList = await getDirInfoFTPAsync(op, path.resolve(settings.ftpWorkDir, programDirName));
+		const infoList = await getDirInfoFTPAsync(op, path.join(settings.ftpWorkDir, programDirName));
 		const fileList = infoList.filter(info => {
 			if (info.type === '-' && asciiProgramRegix.test(info.name)) return info;
 		});
@@ -258,14 +280,25 @@ export async function RemoteCompileExecute(settings: ExtensionSettings, console:
 
 			const programNo: number = Number.parseInt(programNoRegix.exec(file)![0]);
 			const ret = await remoteCompile(programNo, settings.robotIp, CompileType.Compile0);
-		
-			if (ret.code === ResponceCode.Success.code) {
-				vscode.window.showInformationMessage(`success compile ${path.basename(file)}`);	
-			}		
-			else {
-				vscode.window.showErrorMessage(`faild compile ${path.basename(file)}.\n error code: ${ret.code},\nmessage: ${ret.message}`);	
+
+			while (true) {				
+				if (ret.code === ResponceCode.Success.code) {
+					vscode.window.showInformationMessage(`success compile ${path.basename(file)}`);
+					break;
+				}		
+				else if(ret.code === ResponceCode.RemoteCompilationInProgress.code) {
+					vscode.window.showInformationMessage(`waiting compile ${path.basename(file)} ...`);
+					await sleep(1000);
+					continue;
+				}
+				else {
+					vscode.window.showErrorMessage(`faild compile ${path.basename(file)}.\n error code: ${ret.code},\nmessage: ${ret.message}`);
+					break;	
+				}
 			}
 		});
+
+		vscode.window.showInformationMessage(`remote compile done.`);
 
 		return;
 	}
@@ -336,6 +369,7 @@ export async function RemoteDecompileExecute(settings: ExtensionSettings, consol
 					break;
 				}		
 				else if(ret.code === ResponceCode.RemoteCompilationInProgress.code) {
+					vscode.window.showInformationMessage(`waiting decompile ${path.basename(file)} ...`);
 					await sleep(1000);
 					continue;
 				}
