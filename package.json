@@ -10099,6 +10099,10 @@
   },
   "commands": [
    {
+    "command": "Nachi robot language support.set-robot-ip-address",
+    "title": "Nachi robot language support: Set robot ip address"
+   },
+   {
     "command": "Nachi robot language support.get-file-ftp",
     "title": "Nachi robot language support: Get File With FTP"
    },
@@ -10108,7 +10112,11 @@
    },
    {
     "command": "Nachi robot language support.send-and-compile",
-    "title": "Nachi robot language support: Send and Remote Compile"
+    "title": "Nachi robot language support: Send and Remote Compile",
+    "icon": {
+        "light": "images/icons/light/file_upload-24px.svg",
+        "dark": "images/icons/dark/file_upload-white-24dp.svg"
+    }
    },
    {
     "command": "Nachi robot language support.remote-compile",
@@ -10118,7 +10126,37 @@
     "command": "Nachi robot language support.remote-decompile",
     "title": "Nachi robot language support: Remote decompile"
    }
-  ]
+  ],
+  "keybindings": [
+      {
+          "command": "Nachi robot language support.send-and-compile",
+          "key": "ctrl+n ctrl+u",
+          "mac": "cmd+n"
+      }
+
+  ],
+  "menus": {
+      "explorer/context": [
+        {
+            "command": "Nachi robot language support.send-and-compile",
+            "group": "navigation"
+        }
+      ],
+      "editor/title": [
+        {
+            "command": "Nachi robot language support.send-and-compile",
+            "group": "navigation",
+            "when": "resourceLangId == nrl"
+        }
+    ],
+    "editor/context": [
+        {
+            "command": "Nachi robot language support.send-and-compile",
+            "group": "navigation",
+            "when": "resourceLangId == nrl"
+        }
+      ]
+  }
  },
  "scripts": {
   "vscode:prepublish": "npm run compile",

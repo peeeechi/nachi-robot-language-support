@@ -27,6 +27,22 @@ export function activate(context: vscode.ExtensionContext) {
 	settings.robotType 	= "MZ07-01";
 	settings.ftpWorkDir = "WORK";
 
+	const ipStatusBar 	= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+	ipStatusBar.tooltip = "robot ip address";
+	ipStatusBar.command = `${extentionName}.set-robot-ip-address`;
+	ipStatusBar.text 	= settings.robotIp;
+	ipStatusBar.show();
+
+	let setRobotIpAddressCommand = vscode.commands.registerCommand(`${extentionName}.set-robot-ip-address`, async () => {
+		const newIp = await vscode.window.showInputBox({value: settings.robotIp, placeHolder: "ip address for ftp to CFD or FDonDesk."});
+
+		if (newIp == null) {
+			return;
+		}
+
+		settings.robotIp = newIp;
+	});
+
 	let sendfileWithFtpCommand = vscode.commands.registerCommand(`${extentionName}.send-file-ftp`, () => {
 		vscode.window.showErrorMessage("send-file-ftp is not supported.")
 	});
@@ -59,6 +75,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(
+		setRobotIpAddressCommand,
 		sendfileWithFtpCommand,
 		sendAndCompileCommand,
 		getfileWithFtpCommand,
@@ -166,7 +183,8 @@ export async function getfileWithFtp(settings: ExtensionSettings, console: vscod
 					else if (targetInfo.type == '-') {
 	
 						client.get(targetInfo.name, (err, stream) => {
-							const saveFilePath = path.resolve(vscode.workspace.rootPath!, targetInfo.name);
+							// const saveFilePath = path.resolve(vscode.workspace.rootPath!, targetInfo.name);
+							const saveFilePath = path.resolve(vscode.workspace.workspaceFolders![0].uri.fsPath, targetInfo.name);
 							if (err) {
 								vscode.window.showErrorMessage(err.message);
 								client.end();
