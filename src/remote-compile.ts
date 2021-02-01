@@ -107,7 +107,8 @@ export const ResponceCode = {
      * カレントプログラムは編集中である可能性があるため、コンパイルを行うことはできません。
      * カレントプログラムを変更してください。 
      */
-    CurrentProgramSelected: { code: 0x10,  message: "CurrentProgramSelected"}
+    // CurrentProgramSelected: { code: 0x10,  message: "CurrentProgramSelected"}
+    CurrentProgramSelected: { code: 0x0A,  message: "CurrentProgramSelected"}
 }
 
 function convertTypedArray(src: any) {

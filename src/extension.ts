@@ -5,7 +5,6 @@ import ExtensionSettings from './extension-settings';
 import {createClient, getDirInfoFTPAsync,getFileFTPAsync,sendFileFTPAsync} from './ftp-client';
 import {CompileType,ResponceCode,remoteCompile, ResponceCodeMessagePair} from './remote-compile';
 import * as path from 'path';
-import { resolve } from 'dns';
 
 const extentionName 		= 'Nachi robot language support';
 const programDirName 		= "PROGRAM";
@@ -23,9 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
 	outputConsole.appendLine(`ftpWorkDir: ${settings.ftpWorkDir}`);
 
 
-	settings.robotIp 	= "127.0.0.1";
-	settings.robotType 	= "MZ07-01";
-	settings.ftpWorkDir = "WORK";
+	// settings.robotIp 	= "127.0.0.1";
+	// settings.robotType 	= "MZ07-01";
+	// settings.ftpWorkDir = "WORK";
 
 	const ipStatusBar 	= vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
 	ipStatusBar.tooltip = "robot ip address";
@@ -258,7 +257,7 @@ export async function sendFileAndRemoteCompileExecute(settings: ExtensionSetting
 				continue;
 			}
 			else {
-				vscode.window.showErrorMessage(`faild compile ${path.basename(programFile)} with code ${ret}`);	
+				vscode.window.showErrorMessage(`faild compile ${path.basename(programFile)} with code ${ret.message}`);	
 				break;
 			}
 		}
